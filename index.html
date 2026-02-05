@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BC Curriculum Competency Tracker</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://apis.google.com/js/api.js" async defer onload="console.log('Google API loaded')" onerror="console.error('Failed to load Google API')"></script>
+    <script src="https://accounts.google.com/gsi/client" async defer onload="console.log('Google Identity Services loaded')" onerror="console.error('Failed to load Google Identity Services')"></script>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>BC Curriculum Competency Tracker</h1>
+            <p class="subtitle">Grade 10-12 Competency Recording & Reporting</p>
+            <div class="privacy-badge">🔒 All data stored locally on your device</div>
+        </header>
+
+        <nav class="tabs">
+            <button class="tab-btn active" data-tab="students">Students</button>
+            <button class="tab-btn" data-tab="courses">Courses</button>
+            <button class="tab-btn" data-tab="record">Record Competencies</button>
+            <button class="tab-btn" data-tab="attendance">Attendance</button>
+            <button class="tab-btn" data-tab="reports">Reports</button>
+            <button class="tab-btn" data-tab="settings">Settings</button>
+        </nav>
+
+        <!-- Students Tab -->
+        <div id="students-tab" class="tab-content active">
+            <div class="section-header">
+                <h2>Student Management</h2>
+                <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+                    <div style="display: flex; gap: 5px; align-items: center;">
+                        <button class="btn btn-secondary" id="students-view-icons" title="Icon View">📋</button>
+                        <button class="btn btn-secondary" id="students-view-list" title="List View">☰</button>
+                    </div>
+                    <select id="students-sort" class="form-control" style="width: auto; min-width: 150px;">
+                        <option value="name">Sort by Name</option>
+                        <option value="grade">Sort by Grade</option>
+                    </select>
+                    <button class="btn btn-primary" id="add-student-btn">+ Add Student</button>
+                    <button class="btn btn-secondary" id="import-students-btn">📥 Import Students</button>
+                    <input type="file" id="import-students-file" accept=".csv,.txt" style="display: none;">
+                </div>
+            </div>
+            <div id="students-list" class="students-grid"></div>
+        </div>
+
+        <!-- Courses Tab -->
+        <div id="courses-tab" class="tab-content">
+            <div class="section-header">
+                <h2>Course Management</h2>
+                <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+                    <div style="display: flex; gap: 5px; align-items: center;">
+                        <button class="btn btn-secondary" id="courses-view-icons" title="Icon View">📋</button>
+                        <button class="btn btn-secondary" id="courses-view-list" title="List View">☰</button>
+                    </div>
+                    <select id="courses-sort" class="form-control" style="width: auto; min-width: 150px;">
+                        <option value="name">Sort by Name</option>
+                        <option value="grade">Sort by Grade</option>
+                    </select>
+                    <button class="btn btn-primary" id="add-course-btn">+ Add Course</button>
+                </div>
+            </div>
+            <div id="courses-list" class="courses-grid"></div>
+        </div>
+
+        <!-- Record Competencies Tab -->
+        <div id="record-tab" class="tab-content">
+            <div class="section-header">
+                <h2>Record Competency Demonstrations</h2>
+            </div>
+            <div class="record-form">
+                <div class="form-group">
+                    <label for="record-student">Student:</label>
+                    <select id="record-student" class="form-control"></select>
+                </div>
+                <div id="student-courses-container"></div>
+            </div>
+        </div>
+
+        <!-- Attendance Tab -->
+        <div id="attendance-tab" class="tab-content">
+            <div class="section-header">
+                <h2>Attendance Tracking</h2>
+            </div>
+            <div class="attendance-container">
+                <div class="attendance-controls">
+                    <div class="form-group">
+                        <label for="attendance-date">Date:</label>
+                        <div class="date-navigation">
+                            <button class="btn btn-secondary date-nav-btn" id="prev-day-btn" title="Previous Day">←</button>
+                            <input type="date" id="attendance-date" class="form-control" required>
+                            <button class="btn btn-secondary date-nav-btn" id="next-day-btn" title="Next Day">→</button>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>
+                            <input type="checkbox" id="non-instructional-day" style="margin-right: 8px;">
+                            Mark as Non-Instructional Day
+                        </label>
+                    </div>
+                    <button class="btn btn-primary" id="save-attendance-btn">Save Attendance</button>
+                    <button class="btn btn-secondary" id="mark-all-present-btn">Mark All Present</button>
+                    <button class="btn btn-secondary" id="mark-all-absent-btn">Mark All Absent</button>
+                </div>
+                <div id="attendance-list" class="attendance-list"></div>
+            </div>
+        </div>
+
+        <!-- Reports Tab -->
+        <div id="reports-tab" class="tab-content">
+            <div class="section-header">
+                <h2>Generate Reports</h2>
+            </div>
+            <div class="report-controls">
+                <div class="form-group">
+                    <label for="report-course">Course:</label>
+                    <select id="report-course" class="form-control"></select>
+                </div>
+                <div class="form-group">
+                    <label for="report-student">Student (optional):</label>
+                    <select id="report-student" class="form-control">
+                        <option value="">All Students</option>
+                    </select>
+                </div>
+                <button class="btn btn-primary" id="generate-report-btn">Generate Report</button>
+                <button class="btn btn-secondary" id="export-csv-btn">Export to CSV</button>
+                <button class="btn btn-primary" id="generate-aspen-btn" style="background-color: #10b981;">Generate Aspen Format</button>
+                <button class="btn btn-primary" id="generate-report-card-btn" style="background-color: #ec4899;">Report Card (Print)</button>
+                <button class="btn btn-secondary" id="print-report-card-btn" style="display:none;">Print / Save PDF</button>
+            </div>
+            
+            <!-- Attendance Report Section -->
+            <div class="section-header" style="margin-top: 30px; border-top: 2px solid var(--border-color); padding-top: 20px;">
+                <h2>Attendance Report</h2>
+            </div>
+            <div class="report-controls">
+                <div class="form-group">
+                    <label for="attendance-report-start-date">Start Date:</label>
+                    <input type="date" id="attendance-report-start-date" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label for="attendance-report-end-date">End Date:</label>
+                    <input type="date" id="attendance-report-end-date" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label for="attendance-report-student">Student:</label>
+                    <select id="attendance-report-student" class="form-control">
+                        <option value="">All Students</option>
+                    </select>
+                </div>
+                <button class="btn btn-primary" id="generate-attendance-report-btn">Generate Attendance Report</button>
+            </div>
+            <div id="attendance-report-output"></div>
+            
+            <div id="report-output"></div>
+            <div id="aspen-output" style="display: none;"></div>
+            <div id="report-card-output" style="display: none;"></div>
+        </div>
+
+        <!-- Settings Tab -->
+        <div id="settings-tab" class="tab-content">
+            <div class="section-header">
+                <h2>Settings</h2>
+            </div>
+            <div class="settings-content">
+                <div class="setting-item">
+                    <h3>Data Management</h3>
+                    <button class="btn btn-secondary" id="export-data-btn">Export All Data</button>
+                    <button class="btn btn-secondary" id="import-data-btn">Import Data</button>
+                    <input type="file" id="import-file" accept=".json" style="display: none;">
+                    <button class="btn btn-danger" id="clear-data-btn">Clear All Data</button>
+                </div>
+                <div class="setting-item">
+                    <h3>Stock Comments</h3>
+                    <div id="stock-comments-list"></div>
+                    <button class="btn btn-primary" id="add-stock-comment-btn">+ Add Stock Comment</button>
+                </div>
+                <div class="setting-item">
+                    <h3>Team Collaboration</h3>
+                    <div id="google-drive-status" style="margin-bottom: 15px; padding: 15px; background: var(--bg-color); border-radius: 6px;">
+                        <div id="drive-not-connected">
+                            <p style="margin-bottom: 10px; color: var(--secondary-color);">Connect to Google Drive for automatic team collaboration.</p>
+                            <p style="margin-bottom: 10px; font-size: 0.85rem; color: var(--secondary-color);">
+                                <strong>Setup required:</strong> See <code>GOOGLE_DRIVE_SETUP.md</code> for configuration instructions.
+                            </p>
+                            <button class="btn btn-primary" id="connect-drive-btn">🔗 Connect to Google Drive</button>
+                        </div>
+                        <div id="drive-connected" style="display: none;">
+                            <p style="margin-bottom: 10px; color: var(--success-color);">✅ Connected to Google Drive</p>
+                            <p id="drive-email" style="font-size: 0.9rem; color: var(--secondary-color); margin-bottom: 10px;"></p>
+                            <button class="btn btn-primary" id="sync-drive-btn">🔄 Sync Now</button>
+                            <button class="btn btn-secondary" id="disconnect-drive-btn" style="margin-left: 10px;">Disconnect</button>
+                            <div style="margin-top: 10px; font-size: 0.85rem; color: var(--secondary-color);">
+                                <p>Last synced: <span id="last-sync-time">Never</span></p>
+                            </div>
+                        </div>
+                    </div>
+                    <div style="margin-top: 15px; padding: 15px; background: var(--bg-color); border-radius: 6px; font-size: 0.9rem;">
+                        <strong>Manual Export/Import (Alternative):</strong>
+                        <div style="margin-top: 10px; display: flex; gap: 10px; flex-wrap: wrap;">
+                            <button class="btn btn-secondary" id="export-enrollments-btn" style="font-size: 0.9rem;">📤 Export to Excel</button>
+                            <button class="btn btn-secondary" id="import-enrollments-btn" style="font-size: 0.9rem;">📥 Import from Excel</button>
+                            <input type="file" id="import-enrollments-file" accept=".csv,.xlsx,.xls" style="display: none;">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modals -->
+    <div id="student-modal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2 id="student-modal-title">Add Student</h2>
+            <form id="student-form">
+                <div class="form-group">
+                    <label for="student-name">Full Name:</label>
+                    <input type="text" id="student-name" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label for="student-grade">Grade Level:</label>
+                    <select id="student-grade" class="form-control">
+                        <option value="">Not specified</option>
+                        <option value="9">Grade 9</option>
+                        <option value="10">Grade 10</option>
+                        <option value="11">Grade 11</option>
+                        <option value="12">Grade 12</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="student-grad-plan">Grad Plan:</label>
+                    <select id="student-grad-plan" class="form-control">
+                        <option value="">Not specified</option>
+                        <option value="Dogwood Diploma">Dogwood Diploma</option>
+                        <option value="Adult Dogwood Diploma">Adult Dogwood Diploma</option>
+                        <option value="Evergreen Certificate">Evergreen Certificate</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="student-cross-enrolment">Cross Enrolment:</label>
+                    <select id="student-cross-enrolment" class="form-control">
+                        <option value="">None</option>
+                        <option value="FH Collins">FH Collins</option>
+                        <option value="Porter Creek">Porter Creek</option>
+                        <option value="St. Francis">St. Francis</option>
+                        <option value="AVS">AVS</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="student-iep">IEP/SSP:</label>
+                    <select id="student-iep" class="form-control">
+                        <option value="">None</option>
+                        <option value="I">IEP</option>
+                        <option value="S">SSP</option>
+                    </select>
+                </div>
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">Save</button>
+                    <button type="button" class="btn btn-secondary" id="cancel-student-btn">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="course-modal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2 id="course-modal-title">Add Course</h2>
+            <form id="course-form">
+                <div class="form-group">
+                    <label for="course-name">Course Name:</label>
+                    <input type="text" id="course-name" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label for="course-grade">Grade Level:</label>
+                    <select id="course-grade" class="form-control" required>
+                        <option value="10">Grade 10</option>
+                        <option value="11">Grade 11</option>
+                        <option value="12">Grade 12</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label id="competencies-label">Curricular Competencies:</label>
+                    <div id="competencies-list"></div>
+                    <button type="button" class="btn btn-secondary" id="add-competency-btn">+ Add Competency</button>
+                </div>
+                <div class="form-group">
+                    <label for="course-units">Total Units:</label>
+                    <input type="number" id="course-units" class="form-control" value="11" min="1">
+                </div>
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">Save</button>
+                    <button type="button" class="btn btn-secondary" id="cancel-course-btn">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Unicorn Celebration -->
+    <div id="unicorn-celebration" style="display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 10000; pointer-events: none;">
+        <div id="unicorn-emoji" style="font-size: 120px; text-align: center;">
+            🦄
+        </div>
+        <div style="text-align: center; margin-top: 20px; font-size: 24px; font-weight: bold; color: #ff69b4; text-shadow: 2px 2px 4px rgba(0,0,0,0.3);">
+            🎉 All Units Complete! 🎉
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>

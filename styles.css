@@ -1,0 +1,1961 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+:root {
+    --primary-color: #e40303;
+    --primary-hover: #c10202;
+    --secondary-color: #ff8c00;
+    --success-color: #008026;
+    --danger-color: #750787;
+    --bg-color: #fef7ff;
+    --card-bg: #ffffff;
+    --text-color: #1e293b;
+    --border-color: #e2e8f0;
+    --shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    --pride-red: #e40303;
+    --pride-orange: #ff8c00;
+    --pride-yellow: #ffed00;
+    --pride-green: #008026;
+    --pride-blue: #004dff;
+    --pride-purple: #750787;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    line-height: 1.6;
+}
+
+.container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+header {
+    background: linear-gradient(135deg, 
+        var(--pride-red) 0%, 
+        var(--pride-orange) 16.66%, 
+        var(--pride-yellow) 33.33%, 
+        var(--pride-green) 50%, 
+        var(--pride-blue) 66.66%, 
+        var(--pride-purple) 100%);
+    color: white;
+    padding: 30px;
+    border-radius: 12px;
+    margin-bottom: 30px;
+    box-shadow: var(--shadow-lg);
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+header h1 {
+    font-size: 2.5rem;
+    margin-bottom: 10px;
+}
+
+.subtitle {
+    font-size: 1.1rem;
+    opacity: 0.9;
+}
+
+.privacy-badge {
+    margin-top: 15px;
+    padding: 8px 16px;
+    background: rgba(255, 255, 255, 0.3);
+    border-radius: 20px;
+    display: inline-block;
+    font-size: 0.9rem;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.5);
+}
+
+.tabs {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 30px;
+    border-bottom: 2px solid var(--border-color);
+    flex-wrap: wrap;
+}
+
+.tab-btn {
+    padding: 12px 24px;
+    background: none;
+    border: none;
+    border-bottom: 3px solid transparent;
+    cursor: pointer;
+    font-size: 1rem;
+    color: var(--secondary-color);
+    transition: all 0.3s;
+    font-weight: 500;
+}
+
+.tab-btn:hover {
+    color: var(--pride-purple);
+    background: linear-gradient(90deg, 
+        rgba(228, 3, 3, 0.05) 0%, 
+        rgba(255, 140, 0, 0.05) 20%, 
+        rgba(255, 237, 0, 0.05) 40%, 
+        rgba(0, 128, 38, 0.05) 60%, 
+        rgba(0, 77, 255, 0.05) 80%, 
+        rgba(117, 7, 135, 0.05) 100%);
+}
+
+.tab-btn.active {
+    color: var(--pride-purple);
+    border-bottom-color: var(--pride-purple);
+    font-weight: 600;
+}
+
+.tab-content {
+    display: none;
+    animation: fadeIn 0.3s;
+}
+
+.tab-content.active {
+    display: block;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 25px;
+}
+
+.section-header h2 {
+    font-size: 1.8rem;
+    color: var(--text-color);
+}
+
+.btn {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 1rem;
+    font-weight: 500;
+    transition: all 0.2s;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, var(--pride-red) 0%, var(--pride-orange) 20%, var(--pride-yellow) 40%, var(--pride-green) 60%, var(--pride-blue) 80%, var(--pride-purple) 100%);
+    color: white;
+    border: none;
+    font-weight: 600;
+}
+
+.btn-primary:hover {
+    background: linear-gradient(135deg, var(--pride-purple) 0%, var(--pride-blue) 20%, var(--pride-green) 40%, var(--pride-yellow) 60%, var(--pride-orange) 80%, var(--pride-red) 100%);
+    transform: translateY(-1px);
+    box-shadow: var(--shadow);
+}
+
+.btn-secondary {
+    background-color: var(--secondary-color);
+    color: white;
+}
+
+.btn-secondary:hover {
+    background-color: #475569;
+}
+
+.btn-danger {
+    background-color: var(--danger-color);
+    color: white;
+}
+
+.btn-danger:hover {
+    background-color: #dc2626;
+}
+
+.students-grid, .courses-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 20px;
+}
+
+.students-grid.list-view, .courses-grid.list-view {
+    display: block;
+    grid-template-columns: none;
+}
+
+.students-grid.list-view .student-card,
+.courses-grid.list-view .course-card {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 10px;
+    padding: 15px 20px;
+    flex-wrap: wrap;
+    gap: 15px;
+}
+
+.students-grid.list-view .student-card > div:first-child,
+.courses-grid.list-view .course-card > div:first-child {
+    flex: 1;
+    min-width: 200px;
+}
+
+.students-grid.list-view .student-card h3,
+.courses-grid.list-view .course-card h3 {
+    margin: 0;
+    margin-bottom: 5px;
+}
+
+.students-grid.list-view .student-card .badge,
+.courses-grid.list-view .course-card .badge {
+    margin: 2px;
+}
+
+.btn.active {
+    background: linear-gradient(to right, #E40303, #FF8C00, #FFED00, #008026, #0044FF, #760088);
+    color: white;
+    box-shadow: var(--shadow-lg);
+}
+
+@keyframes unicornDance {
+    0%, 100% {
+        transform: rotate(0deg) scale(1);
+    }
+    10% {
+        transform: rotate(-10deg) scale(1.1);
+    }
+    20% {
+        transform: rotate(10deg) scale(1.1);
+    }
+    30% {
+        transform: rotate(-10deg) scale(1.1);
+    }
+    40% {
+        transform: rotate(10deg) scale(1.1);
+    }
+    50% {
+        transform: rotate(0deg) scale(1.2);
+    }
+    60% {
+        transform: rotate(-15deg) scale(1.1);
+    }
+    70% {
+        transform: rotate(15deg) scale(1.1);
+    }
+    80% {
+        transform: rotate(-15deg) scale(1.1);
+    }
+    90% {
+        transform: rotate(15deg) scale(1.1);
+    }
+}
+
+#unicorn-emoji {
+    animation: unicornDance 2s ease-in-out;
+}
+
+#unicorn-celebration {
+    animation: fadeInOut 3s ease-in-out;
+}
+
+@keyframes fadeInOut {
+    0% {
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(0.5);
+    }
+    20% {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(1);
+    }
+    80% {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(1);
+    }
+    100% {
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(0.5);
+    }
+}
+
+.student-card, .course-card {
+    background: var(--card-bg);
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: var(--shadow);
+    transition: all 0.2s;
+    border-left: 4px solid transparent;
+    background-image: linear-gradient(to right, 
+        var(--pride-red) 0%, 
+        var(--pride-orange) 20%, 
+        var(--pride-yellow) 40%, 
+        var(--pride-green) 60%, 
+        var(--pride-blue) 80%, 
+        var(--pride-purple) 100%);
+    background-size: 4px 100%;
+    background-repeat: no-repeat;
+}
+
+.student-card:hover, .course-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-lg);
+    border-left-width: 6px;
+}
+
+.student-card h3, .course-card h3 {
+    margin-bottom: 10px;
+    color: var(--text-color);
+}
+
+.student-card .badge {
+    display: inline-block;
+    padding: 4px 12px;
+    border-radius: 12px;
+    font-size: 0.85rem;
+    margin-top: 8px;
+}
+
+.badge-iep {
+    background: linear-gradient(135deg, var(--pride-blue) 0%, var(--pride-purple) 100%);
+    color: white;
+    font-weight: 600;
+}
+
+.badge-ssp {
+    background: linear-gradient(135deg, var(--pride-yellow) 0%, var(--pride-orange) 100%);
+    color: white;
+    font-weight: 600;
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 500;
+    color: var(--text-color);
+}
+
+.form-control {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    font-size: 1rem;
+    transition: border-color 0.2s;
+}
+
+.form-control:focus {
+    outline: none;
+    border-color: var(--pride-purple);
+    box-shadow: 0 0 0 3px rgba(117, 7, 135, 0.15);
+}
+
+.form-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 25px;
+}
+
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(4px);
+}
+
+.modal-content {
+    background-color: var(--card-bg);
+    margin: 5% auto;
+    padding: 30px;
+    border-radius: 12px;
+    width: 90%;
+    max-width: 600px;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: var(--shadow-lg);
+    animation: slideDown 0.3s;
+}
+
+@keyframes slideDown {
+    from {
+        transform: translateY(-50px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+.close {
+    color: var(--secondary-color);
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+    line-height: 20px;
+}
+
+.close:hover {
+    color: var(--text-color);
+}
+
+.competency-item {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 10px;
+    align-items: center;
+}
+
+.competency-item input {
+    flex: 1;
+}
+
+.competency-item button {
+    padding: 8px 12px;
+}
+
+.record-form {
+    background: var(--card-bg);
+    padding: 25px;
+    border-radius: 8px;
+    box-shadow: var(--shadow);
+}
+
+#student-courses-container {
+    margin-top: 20px;
+}
+
+.course-record-form {
+    background: var(--bg-color);
+    padding: 20px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    border: 2px solid var(--border-color);
+    box-shadow: var(--shadow);
+}
+
+.course-record-header {
+    margin-bottom: 20px;
+    padding-bottom: 10px;
+    border-bottom: 2px solid var(--border-color);
+}
+
+.course-record-header h3 {
+    margin: 0;
+    color: var(--text-color);
+    font-size: 1.3rem;
+    font-weight: 700;
+}
+
+.competency-grid {
+    display: grid;
+    gap: 15px;
+    margin-top: 20px;
+}
+
+.competency-row {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 15px;
+    padding: 15px;
+    background: var(--bg-color);
+    border-radius: 6px;
+    align-items: center;
+    border-left: 3px solid;
+    border-image: linear-gradient(to bottom, 
+        var(--pride-red), 
+        var(--pride-orange), 
+        var(--pride-yellow), 
+        var(--pride-green), 
+        var(--pride-blue), 
+        var(--pride-purple)) 1;
+}
+
+.behaviours-section {
+    margin-top: 30px;
+    padding-top: 30px;
+    border-top: 2px solid var(--border-color);
+}
+
+.behaviour-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px;
+    background: var(--bg-color);
+    border-radius: 6px;
+    margin-bottom: 10px;
+}
+
+.behaviour-item label {
+    flex: 1;
+    margin: 0;
+}
+
+.behaviour-item select {
+    width: 150px;
+}
+
+.report-controls {
+    background: var(--card-bg);
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: var(--shadow);
+    margin-bottom: 20px;
+    display: flex;
+    gap: 15px;
+    flex-wrap: wrap;
+    align-items: flex-end;
+}
+
+.report-controls .form-group {
+    flex: 1;
+    min-width: 200px;
+    margin: 0;
+}
+
+.report-output {
+    background: var(--card-bg);
+    padding: 25px;
+    border-radius: 8px;
+    box-shadow: var(--shadow);
+}
+
+.report-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+
+.report-table th,
+.report-table td {
+    padding: 12px;
+    text-align: left;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.report-table th {
+    background-color: var(--bg-color);
+    font-weight: 600;
+    position: sticky;
+    top: 0;
+}
+
+.report-table tr:hover {
+    background-color: var(--bg-color);
+}
+
+/* Report Card (Printable) */
+.report-card {
+    background: white;
+    color: #111827;
+    padding: 24px;
+    border-radius: 12px;
+    box-shadow: var(--shadow);
+    margin-top: 20px;
+    font-family: 'Georgia', 'Times New Roman', serif;
+    line-height: 1.6;
+}
+
+.report-card .rc-header {
+    display: flex;
+    justify-content: space-between;
+    gap: 20px;
+    align-items: flex-start;
+    border-bottom: 3px solid #1e293b;
+    padding-bottom: 20px;
+    margin-bottom: 24px;
+}
+
+.report-card .rc-header-left {
+    display: flex;
+    gap: 16px;
+    align-items: flex-start;
+    flex: 1;
+}
+
+.report-card .rc-logo {
+    width: 100px;
+    height: 100px;
+    min-width: 100px;
+    border-radius: 8px;
+    background: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    overflow: hidden;
+    flex-shrink: 0;
+}
+
+.report-card .rc-logo img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    display: block;
+}
+
+.report-card .rc-school-name {
+    font-weight: 700;
+    font-size: 1.15rem;
+    color: #0f172a;
+    margin-bottom: 6px;
+    letter-spacing: 0.3px;
+}
+
+.report-card .rc-school-address {
+    font-size: 0.9rem;
+    color: #334155;
+    line-height: 1.5;
+    margin-top: 4px;
+}
+
+.report-card .rc-title {
+    font-size: 2rem;
+    font-weight: 800;
+    margin: 0;
+}
+
+.report-card .rc-subtitle {
+    margin-top: 8px;
+    color: #475569;
+    font-size: 0.95rem;
+    font-weight: 500;
+}
+
+.report-card .rc-meta {
+    text-align: right;
+    color: #475569;
+    font-size: 0.9rem;
+    line-height: 1.5;
+}
+
+.report-card .rc-section {
+    margin-top: 22px;
+    page-break-inside: avoid;
+}
+
+.report-card .rc-teacher-comment {
+    page-break-after: avoid;
+}
+
+.report-card .rc-courses-section {
+    page-break-before: avoid;
+    margin-top: 22px;
+}
+
+.report-card .rc-section h3 {
+    margin: 0 0 12px 0;
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: #0f172a;
+    letter-spacing: 0.2px;
+    border-bottom: 2px solid #e2e8f0;
+    padding-bottom: 6px;
+}
+
+.report-card .rc-land-acknowledgement {
+    margin-top: 12px;
+    page-break-inside: avoid;
+}
+
+.report-card .rc-land-acknowledgement h3 {
+    margin: 0 0 12px 0;
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: #0f172a;
+    letter-spacing: 0.2px;
+    border-bottom: 2px solid #e2e8f0;
+    padding-bottom: 6px;
+}
+
+.report-card .rc-land-acknowledgement-box {
+    padding: 16px;
+    font-size: 0.95rem;
+    line-height: 1.7;
+}
+
+.report-card .rc-land-acknowledgement-box p {
+    margin: 0;
+}
+
+.report-card .rc-box {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 16px;
+    line-height: 1.7;
+    page-break-inside: avoid;
+}
+
+.report-card .rc-courses-box {
+    padding: 12px;
+}
+
+.report-card .rc-box p {
+    margin: 0 0 12px 0;
+}
+
+.report-card .rc-box p:last-child {
+    margin-bottom: 0;
+}
+
+.report-card .rc-course {
+    margin-top: 8px;
+    padding-top: 8px;
+    border-top: 1px solid #cbd5e1;
+    page-break-inside: avoid;
+    break-inside: avoid;
+}
+
+.report-card .rc-course:first-of-type {
+    margin-top: 0;
+    padding-top: 0;
+    border-top: none;
+}
+
+.report-card .rc-course-title {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
+    align-items: baseline;
+    margin-bottom: 4px;
+}
+
+.report-card .rc-course-title h4 {
+    margin: 0;
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #0f172a;
+    letter-spacing: 0.1px;
+    line-height: 1.2;
+}
+
+.report-card .rc-grade-inline {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #0f172a;
+    letter-spacing: 0.1px;
+    margin-left: 8px;
+}
+
+.report-card .rc-grade-pill {
+    padding: 4px 10px;
+    border-radius: 999px;
+    background: linear-gradient(135deg, var(--pride-pink, #ec4899) 0%, var(--pride-purple) 100%);
+    color: white;
+    font-weight: 700;
+    font-size: 0.9rem;
+}
+
+.report-card .rc-kv {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 10px;
+    margin-top: 10px;
+    color: #334155;
+    font-size: 0.95rem;
+}
+
+.report-card .rc-kv strong {
+    color: #0f172a;
+}
+
+.report-card .rc-competencies {
+    margin-top: 4px;
+    white-space: pre-wrap;
+    font-family: 'Georgia', 'Times New Roman', serif;
+    font-size: 0.95rem;
+    line-height: 1.4;
+    color: #1e293b;
+}
+
+.report-card .rc-competencies strong {
+    font-weight: 700;
+    color: #0f172a;
+    display: block;
+    margin-bottom: 3px;
+    margin-top: 4px;
+}
+
+.report-card .rc-competencies strong:first-child {
+    margin-top: 0;
+}
+
+.report-card .rc-comments {
+    margin-top: 4px;
+    white-space: pre-wrap;
+    font-family: 'Georgia', 'Times New Roman', serif;
+    font-size: 0.95rem;
+    line-height: 1.4;
+    color: #1e293b;
+}
+
+.report-card .rc-comments strong {
+    font-weight: 700;
+    color: #0f172a;
+    display: block;
+    margin-bottom: 3px;
+}
+
+.report-card .rc-staff-proficiency {
+    margin-top: 22px;
+}
+
+.report-card .rc-staff-proficiency-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    align-items: start;
+}
+
+.report-card .rc-staff-box,
+.report-card .rc-proficiency-box {
+    display: flex;
+    flex-direction: column;
+}
+
+.report-card .rc-staff-box h3,
+.report-card .rc-proficiency-box h3 {
+    margin: 0 0 12px 0;
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: #0f172a;
+    letter-spacing: 0.2px;
+    border-bottom: 2px solid #e2e8f0;
+    padding-bottom: 6px;
+}
+
+.report-card .rc-proficiency-title {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #64748b;
+    opacity: 0.8;
+}
+
+.report-card .rc-staff-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.report-card .rc-staff-item {
+    font-size: 0.9rem;
+    line-height: 1.5;
+    color: #334155;
+}
+
+.report-card .rc-staff-item strong {
+    color: #0f172a;
+    font-weight: 600;
+}
+
+.report-card .rc-proficiency-scale {
+    font-size: 0.85rem;
+    line-height: 1.5;
+    color: #64748b;
+}
+
+.report-card .rc-proficiency-scale p {
+    margin-bottom: 8px;
+}
+
+.report-card .rc-proficiency-scale p:last-child {
+    margin-bottom: 0;
+}
+
+.report-card .rc-proficiency-scale strong {
+    color: #475569;
+    font-weight: 600;
+}
+
+/* Additional print-specific refinements */
+.report-card .rc-box p {
+    text-align: justify;
+    hyphens: auto;
+}
+
+.report-card .rc-section:first-of-type {
+    margin-top: 0;
+}
+
+.report-card .rc-signature {
+    margin-top: 30px;
+    page-break-inside: avoid;
+}
+
+.report-card .rc-signature-box {
+    width: 300px;
+    height: 60px;
+    border: 2px solid #1e293b;
+    border-radius: 4px;
+    margin-bottom: 8px;
+    background: white;
+}
+
+.report-card .rc-signature-name {
+    font-size: 0.95rem;
+    color: #0f172a;
+    font-weight: 500;
+}
+
+.report-card .rc-student-info {
+    margin-bottom: 24px;
+    padding-bottom: 16px;
+    border-bottom: 3px solid #1e293b;
+}
+
+.report-card .rc-student-name {
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: #0f172a;
+    margin: 0 0 8px 0;
+    letter-spacing: 0.2px;
+}
+
+.report-card .rc-student-details {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+    align-items: center;
+    font-size: 12pt;
+    color: #334155;
+}
+
+.report-card .rc-student-detail {
+    font-size: 12pt;
+    color: #334155;
+}
+
+.report-card .page-break {
+    page-break-after: always;
+    break-after: page;
+}
+
+.report-card .section-break {
+    page-break-after: always;
+    break-after: page;
+    margin: 40px 0;
+    border-top: 3px solid #1e293b;
+    padding-top: 20px;
+}
+
+.student-report-section {
+    counter-reset: student-page;
+}
+
+.student-report-section .report-card {
+    counter-increment: student-page;
+}
+
+/* ==================== ATTENDANCE STYLES ==================== */
+.attendance-container {
+    background: var(--card-bg);
+    padding: 15px;
+    border-radius: 8px;
+    box-shadow: var(--shadow);
+}
+
+.attendance-controls {
+    display: flex;
+    gap: 10px;
+    align-items: flex-end;
+    margin-bottom: 15px;
+    flex-wrap: wrap;
+    padding-bottom: 12px;
+    border-bottom: 2px solid var(--border-color);
+}
+
+.attendance-controls .form-group {
+    margin-bottom: 0;
+}
+
+.date-navigation {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.date-nav-btn {
+    padding: 8px 12px;
+    min-width: 40px;
+    font-size: 1.2rem;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.date-nav-btn:hover {
+    background: var(--pride-purple);
+    transform: scale(1.05);
+}
+
+.date-navigation .form-control {
+    flex: 1;
+    min-width: 150px;
+}
+
+.attendance-controls label {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    font-weight: 500;
+}
+
+.attendance-list {
+    margin-top: 10px;
+    max-height: calc(100vh - 300px);
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
+.attendance-table {
+    width: 100%;
+}
+
+.attendance-header {
+    display: grid;
+    grid-template-columns: 2fr 1fr 2fr;
+    gap: 8px;
+    padding: 8px 10px;
+    background: linear-gradient(135deg, var(--pride-red) 0%, var(--pride-orange) 20%, var(--pride-yellow) 40%, var(--pride-green) 60%, var(--pride-blue) 80%, var(--pride-purple) 100%);
+    color: white;
+    font-weight: 600;
+    font-size: 0.9rem;
+    border-radius: 8px 8px 0 0;
+    margin-bottom: 1px;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+}
+
+.attendance-row {
+    display: grid;
+    grid-template-columns: 2fr 1fr 2fr;
+    gap: 8px;
+    padding: 8px 10px;
+    background: var(--card-bg);
+    border-bottom: 1px solid var(--border-color);
+    align-items: center;
+    transition: background-color 0.2s;
+    min-height: 50px;
+}
+
+.attendance-row:hover {
+    background: var(--bg-color);
+}
+
+.attendance-row:last-child {
+    border-bottom: none;
+    border-radius: 0 0 8px 8px;
+}
+
+.attendance-student-col {
+    font-weight: 500;
+    color: var(--text-color);
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 6px;
+    font-size: 0.9rem;
+}
+
+.teacher-tracking-badge {
+    display: inline-block;
+    padding: 2px 6px;
+    font-size: 0.7rem;
+    color: var(--secondary-color);
+    background: rgba(255, 140, 0, 0.1);
+    border: 1px solid rgba(255, 140, 0, 0.2);
+    border-radius: 3px;
+    font-weight: 400;
+    opacity: 0.7;
+    transition: opacity 0.2s;
+}
+
+.teacher-tracking-badge:hover {
+    opacity: 1;
+}
+
+.attendance-status-col {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+}
+
+.attendance-notes-col {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: flex-start;
+    min-height: 40px;
+    font-size: 0.85rem;
+}
+
+.attendance-notes-display {
+    width: 100%;
+}
+
+.attendance-notes-entries {
+    max-height: 150px;
+    overflow-y: auto;
+    margin-bottom: 8px;
+}
+
+.attendance-note-entry {
+    margin-bottom: 8px;
+    padding: 8px;
+    background: var(--bg-color);
+    border-radius: 4px;
+    border-left: 3px solid var(--primary-color);
+}
+
+.attendance-note-date {
+    font-size: 0.75rem;
+    color: var(--secondary-color);
+    font-weight: 600;
+    margin-bottom: 4px;
+}
+
+.attendance-note-text {
+    font-size: 0.9rem;
+    color: var(--text-color);
+    line-height: 1.4;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+}
+
+.attendance-notes-actions {
+    display: flex;
+    gap: 5px;
+}
+
+.attendance-notes-collapsed {
+    transition: background-color 0.2s, border-color 0.2s;
+    padding: 6px !important;
+    font-size: 0.8rem;
+}
+
+.attendance-notes-collapsed > div {
+    font-size: 0.8rem;
+}
+
+.attendance-notes-collapsed > div > div:first-child {
+    font-size: 0.75rem;
+    margin-bottom: 2px;
+}
+
+.attendance-notes-collapsed > div > div:last-child {
+    font-size: 0.7rem;
+}
+
+.attendance-notes-collapsed:hover {
+    background: var(--card-bg) !important;
+    border-color: var(--primary-color) !important;
+}
+
+.notes-toggle-icon {
+    transition: transform 0.2s ease;
+}
+
+.btn-sm {
+    padding: 4px 8px;
+    font-size: 0.85rem;
+}
+
+.attendance-toggle {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    user-select: none;
+}
+
+.attendance-checkbox {
+    display: none;
+}
+
+.attendance-toggle-slider {
+    position: relative;
+    width: 42px;
+    height: 22px;
+    background-color: #dc2626;
+    border-radius: 22px;
+    transition: background-color 0.3s;
+    cursor: pointer;
+}
+
+.attendance-toggle-slider::before {
+    content: '';
+    position: absolute;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background-color: white;
+    top: 3px;
+    left: 3px;
+    transition: transform 0.3s;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.attendance-checkbox:checked + .attendance-toggle-slider {
+    background-color: var(--success-color);
+}
+
+.attendance-checkbox:checked + .attendance-toggle-slider::before {
+    transform: translateX(20px);
+}
+
+.attendance-checkbox:disabled + .attendance-toggle-slider {
+    background-color: #94a3b8;
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+
+.attendance-status-text {
+    font-weight: 500;
+    color: var(--text-color);
+    min-width: 60px;
+    font-size: 0.85rem;
+}
+
+.attendance-info {
+    background: linear-gradient(135deg, rgba(255, 140, 0, 0.1) 0%, rgba(255, 237, 0, 0.1) 100%);
+    border-left: 4px solid var(--pride-orange);
+    padding: 15px;
+    border-radius: 6px;
+}
+
+/* Attendance warning styles */
+.attendance-warning-high {
+    background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+    color: white;
+    padding: 4px 10px;
+    border-radius: 4px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    display: inline-block;
+}
+
+.attendance-warning-critical {
+    background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+    color: white;
+    padding: 4px 10px;
+    border-radius: 4px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    display: inline-block;
+}
+
+.attendance-row.attendance-warning-high {
+    border-left: 4px solid #f59e0b;
+    background: linear-gradient(90deg, rgba(251, 191, 36, 0.1) 0%, var(--card-bg) 10%);
+}
+
+.attendance-row.attendance-warning-critical {
+    border-left: 4px solid #dc2626;
+    background: linear-gradient(90deg, rgba(220, 38, 38, 0.15) 0%, var(--card-bg) 10%);
+}
+
+.attendance-student-name {
+    transition: all 0.2s;
+    border: 2px solid transparent;
+    font-size: 0.9rem;
+    padding: 3px 6px !important;
+}
+
+.attendance-student-name:hover {
+    opacity: 0.8;
+    transform: scale(1.02);
+}
+
+/* Color indicator boxes */
+.attendance-color-green {
+    background-color: #10b981 !important;
+    color: white !important;
+    border: 2px solid #059669 !important;
+}
+
+.attendance-color-yellow {
+    background-color: #fbbf24 !important;
+    color: #78350f !important;
+    border: 2px solid #f59e0b !important;
+}
+
+.attendance-color-red {
+    background-color: #dc2626 !important;
+    color: white !important;
+    border: 2px solid #b91c1c !important;
+}
+
+/* Grad list badge - distinctive icon badge */
+.grad-list-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.1rem;
+    width: 26px;
+    height: 26px;
+    background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+    border-radius: 50%;
+    box-shadow: 0 2px 6px rgba(251, 191, 36, 0.4), 0 0 0 1px rgba(251, 191, 36, 0.2);
+    animation: gradListPulse 2s ease-in-out infinite;
+    flex-shrink: 0;
+    position: relative;
+}
+
+/* Graduated badge - same as grad list but with green check */
+.grad-list-badge.graduated-badge {
+    background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 50%, #10b981 100%);
+    box-shadow: 0 2px 10px rgba(251, 191, 36, 0.5), 0 0 0 2px rgba(16, 185, 129, 0.3);
+    animation: graduatedPulse 2s ease-in-out infinite;
+}
+
+@keyframes gradListPulse {
+    0%, 100% {
+        box-shadow: 0 2px 8px rgba(251, 191, 36, 0.4), 0 0 0 2px rgba(251, 191, 36, 0.2);
+    }
+    50% {
+        box-shadow: 0 2px 12px rgba(251, 191, 36, 0.6), 0 0 0 3px rgba(251, 191, 36, 0.4);
+    }
+}
+
+@keyframes graduatedPulse {
+    0%, 100% {
+        box-shadow: 0 2px 10px rgba(251, 191, 36, 0.5), 0 0 0 2px rgba(16, 185, 129, 0.3);
+    }
+    50% {
+        box-shadow: 0 2px 15px rgba(251, 191, 36, 0.7), 0 0 0 4px rgba(16, 185, 129, 0.5);
+    }
+}
+
+.attendance-color-menu-grad-list {
+    padding: 12px;
+    margin-bottom: 15px;
+    background: linear-gradient(135deg, rgba(251, 191, 36, 0.1) 0%, rgba(251, 191, 36, 0.05) 100%);
+    border-radius: 6px;
+    border: 1px solid rgba(251, 191, 36, 0.3);
+}
+
+.attendance-color-menu-grad-list label {
+    cursor: pointer;
+}
+
+.attendance-color-menu-grad-list input[type="checkbox"] {
+    margin-right: 10px;
+    width: 18px;
+    height: 18px;
+    cursor: pointer;
+}
+
+/* Graduated badge - distinctive icon badge */
+.graduated-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    width: 36px;
+    height: 36px;
+    background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 50%, #dc2626 100%);
+    border-radius: 50%;
+    box-shadow: 0 2px 10px rgba(251, 191, 36, 0.5), 0 0 0 2px rgba(251, 191, 36, 0.3);
+    animation: graduatedShine 3s ease-in-out infinite;
+    flex-shrink: 0;
+}
+
+@keyframes graduatedShine {
+    0%, 100% {
+        box-shadow: 0 2px 10px rgba(251, 191, 36, 0.5), 0 0 0 2px rgba(251, 191, 36, 0.3);
+        transform: scale(1);
+    }
+    50% {
+        box-shadow: 0 2px 15px rgba(251, 191, 36, 0.7), 0 0 0 4px rgba(251, 191, 36, 0.5);
+        transform: scale(1.05);
+    }
+}
+
+/* Attendance color dropdown menu */
+.attendance-color-dropdown {
+    position: fixed;
+    background: var(--card-bg);
+    border-radius: 8px;
+    box-shadow: var(--shadow-lg);
+    min-width: 280px;
+    max-width: 350px;
+    z-index: 10000;
+}
+
+.attendance-color-menu {
+    padding: 15px;
+}
+
+.attendance-color-menu-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+    padding-bottom: 10px;
+    border-bottom: 2px solid var(--border-color);
+}
+
+.attendance-color-close {
+    background: none;
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+    color: var(--text-color);
+    padding: 0;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.attendance-color-close:hover {
+    color: var(--pride-purple);
+}
+
+.attendance-color-menu-info {
+    margin-bottom: 15px;
+    padding: 10px;
+    background: var(--bg-color);
+    border-radius: 6px;
+    font-size: 0.9rem;
+}
+
+.attendance-color-menu-options {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 15px;
+}
+
+.attendance-color-option {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    padding: 8px;
+    border-radius: 6px;
+    transition: background-color 0.2s;
+}
+
+.attendance-color-option:hover {
+    background: var(--bg-color);
+}
+
+.attendance-color-option input[type="radio"] {
+    margin-right: 10px;
+    cursor: pointer;
+}
+
+.attendance-color-label {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex: 1;
+}
+
+.attendance-color-box {
+    width: 24px;
+    height: 24px;
+    border-radius: 4px;
+    border: 2px solid;
+    display: inline-block;
+}
+
+.attendance-color-box.green {
+    background-color: #10b981;
+    border-color: #059669;
+}
+
+.attendance-color-box.yellow {
+    background-color: #fbbf24;
+    border-color: #f59e0b;
+}
+
+.attendance-color-box.red {
+    background-color: #dc2626;
+    border-color: #b91c1c;
+}
+
+.attendance-color-box.auto {
+    background: linear-gradient(135deg, #10b981 0%, #fbbf24 50%, #dc2626 100%);
+    border-color: #475569;
+}
+
+.attendance-color-menu-actions {
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end;
+    padding-top: 10px;
+    border-top: 2px solid var(--border-color);
+}
+
+@media print {
+    * {
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+    }
+    
+    body {
+        background: white;
+        font-size: 12pt;
+    }
+    
+    header, nav.tabs, .section-header, .report-controls, .privacy-badge {
+        display: none !important;
+    }
+    
+    .report-card {
+        box-shadow: none;
+        border-radius: 0;
+        margin: 0;
+        padding: 0;
+        page-break-after: always;
+        break-after: page;
+        font-size: 11pt;
+        line-height: 1.6;
+    }
+    
+    .report-card .rc-header {
+        border-bottom: 3px solid #1e293b;
+        padding-bottom: 16px;
+        margin-bottom: 20px;
+    }
+    
+    .report-card .rc-logo {
+        width: 90px;
+        height: 90px;
+        box-shadow: none;
+        border: 1px solid #e2e8f0;
+    }
+    
+    .report-card .rc-logo img {
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+    }
+    
+    .report-card .rc-section {
+        margin-top: 18px;
+        page-break-inside: avoid;
+        orphans: 3;
+        widows: 3;
+    }
+    
+    .report-card .rc-teacher-comment {
+        page-break-after: avoid;
+        break-after: avoid;
+    }
+    
+    .report-card .rc-courses-section {
+        page-break-before: avoid;
+        break-before: avoid;
+        margin-top: 18px;
+    }
+    
+    .report-card .rc-section h3 {
+        page-break-after: avoid;
+        font-size: 13pt;
+    }
+    
+    .report-card .rc-land-acknowledgement {
+        margin-top: 12px;
+        page-break-inside: avoid;
+    }
+    
+    .report-card .rc-land-acknowledgement h3 {
+        font-size: 13pt;
+        margin-bottom: 12px;
+        padding-bottom: 6px;
+    }
+    
+    .report-card .rc-land-acknowledgement-box {
+        padding: 16px;
+        font-size: 11pt;
+        line-height: 1.7;
+    }
+    
+    .report-card .rc-box {
+        page-break-inside: avoid;
+        break-inside: avoid;
+        orphans: 3;
+        widows: 3;
+        background: #f8fafc !important;
+        border: 1px solid #e2e8f0;
+    }
+    
+    .report-card .rc-courses-box {
+        padding: 10px;
+    }
+    
+    .report-card .rc-course {
+        page-break-inside: avoid;
+        break-inside: avoid;
+        orphans: 3;
+        widows: 3;
+        margin-top: 6px;
+        padding-top: 6px;
+    }
+    
+    .report-card .rc-course-title {
+        page-break-after: avoid;
+        margin-bottom: 3px;
+    }
+    
+    .report-card .rc-course-title h4 {
+        font-size: 11pt;
+        line-height: 1.15;
+    }
+    
+    .report-card .rc-grade-inline {
+        font-size: 11pt;
+        font-weight: 700;
+        color: #0f172a;
+    }
+    
+    .report-card .rc-competencies {
+        margin-top: 3px;
+        line-height: 1.35;
+        font-size: 9.5pt;
+    }
+    
+    .report-card .rc-competencies strong {
+        margin-bottom: 2px;
+        margin-top: 3px;
+    }
+    
+    .report-card .rc-competencies strong:first-child {
+        margin-top: 0;
+    }
+    
+    .report-card .rc-comments {
+        margin-top: 3px;
+        line-height: 1.35;
+        font-size: 9.5pt;
+    }
+    
+    .report-card .rc-comments strong {
+        margin-bottom: 2px;
+    }
+    
+    .report-card .rc-signature {
+        margin-top: 20px;
+        page-break-inside: avoid;
+    }
+    
+    .report-card .rc-signature-box {
+        width: 250px;
+        height: 50px;
+        border: 2px solid #1e293b;
+    }
+    
+    .report-card .rc-signature-name {
+        font-size: 10pt;
+    }
+    
+    .report-card .rc-competencies,
+    .report-card .rc-comments {
+        orphans: 3;
+        widows: 3;
+        font-size: 10.5pt;
+    }
+    
+    .report-card .rc-student-info {
+        margin-bottom: 20px;
+        padding-bottom: 12px;
+        border-bottom: 3px solid #1e293b;
+    }
+    
+    .report-card .rc-student-name {
+        font-size: 12pt;
+        font-weight: 700;
+        color: #0f172a;
+        margin: 0 0 6px 0;
+    }
+    
+    .report-card .rc-student-details {
+        font-size: 12pt;
+        gap: 12px;
+    }
+    
+    .report-card .rc-student-detail {
+        font-size: 12pt;
+    }
+    
+    .report-card .rc-staff-proficiency-container {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 15px;
+    }
+    
+    .report-card .rc-staff-box h3,
+    .report-card .rc-proficiency-box h3 {
+        font-size: 11pt;
+    }
+    
+    .report-card .rc-proficiency-title {
+        font-size: 10pt;
+        font-weight: 500;
+        color: #64748b;
+    }
+    
+    .report-card .rc-staff-item {
+        font-size: 9pt;
+    }
+    
+    .report-card .rc-proficiency-scale {
+        font-size: 8pt;
+        color: #64748b;
+    }
+    
+    .report-card .rc-proficiency-scale strong {
+        font-weight: 500;
+        color: #475569;
+    }
+    
+    .report-card .rc-grade-pill {
+        background: linear-gradient(135deg, #ec4899 0%, #760088 100%) !important;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+    }
+    
+    .report-card .section-break {
+        page-break-after: always;
+        break-after: page;
+        margin: 30px 0;
+        border-top: 3px solid #1e293b;
+        padding-top: 15px;
+    }
+    
+    .student-report-section {
+        counter-reset: student-page;
+    }
+    
+    .student-report-section .report-card {
+        counter-increment: student-page;
+    }
+    
+    .section-break {
+        counter-reset: student-page;
+    }
+    
+    @page {
+        size: legal;
+        margin: 15mm 15mm 25mm 15mm;
+        @top-right {
+            content: "";
+        }
+        @bottom-center {
+            content: "";
+        }
+        @bottom-left {
+            content: "";
+        }
+        @bottom-right {
+            content: "";
+        }
+    }
+    
+    @page :first {
+        margin-top: 20mm;
+    }
+}
+
+.settings-content {
+    background: var(--card-bg);
+    padding: 25px;
+    border-radius: 8px;
+    box-shadow: var(--shadow);
+}
+
+.setting-item {
+    margin-bottom: 30px;
+    padding-bottom: 30px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.setting-item:last-child {
+    border-bottom: none;
+}
+
+.setting-item h3 {
+    margin-bottom: 15px;
+}
+
+.setting-item .btn {
+    margin-right: 10px;
+    margin-bottom: 10px;
+}
+
+.stock-comment-item {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 10px;
+    align-items: center;
+}
+
+.stock-comment-item input {
+    flex: 1;
+}
+
+@media (max-width: 768px) {
+    .container {
+        padding: 10px;
+    }
+
+    header h1 {
+        font-size: 1.8rem;
+    }
+
+    .tabs {
+        overflow-x: auto;
+    }
+
+    .tab-btn {
+        white-space: nowrap;
+    }
+
+    .students-grid, .courses-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .report-controls {
+        flex-direction: column;
+    }
+
+    .report-controls .form-group {
+        width: 100%;
+    }
+}
+
+/* Attendance Report Styles */
+.attendance-report-container {
+    background: var(--card-bg);
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: var(--shadow);
+    margin-top: 20px;
+}
+
+.attendance-report-container h3 {
+    color: var(--primary-color);
+    margin-bottom: 15px;
+    border-bottom: 2px solid var(--border-color);
+    padding-bottom: 10px;
+}
+
+.attendance-summary {
+    background: var(--bg-color);
+    padding: 15px;
+    border-radius: 6px;
+    margin-bottom: 20px;
+}
+
+.attendance-summary p {
+    margin: 5px 0;
+    color: var(--text-color);
+}
+
+.attendance-report-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 15px;
+    background: var(--card-bg);
+    box-shadow: var(--shadow);
+}
+
+.attendance-report-table thead {
+    background: linear-gradient(135deg, var(--pride-red) 0%, var(--pride-orange) 20%, var(--pride-yellow) 40%, var(--pride-green) 60%, var(--pride-blue) 80%, var(--pride-purple) 100%);
+    color: white;
+}
+
+.attendance-report-table th {
+    padding: 12px;
+    text-align: left;
+    font-weight: 600;
+}
+
+.attendance-report-table td {
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.attendance-report-table tbody tr:hover {
+    background: var(--bg-color);
+}
+
+.attendance-report-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+.btn-sm {
+    padding: 5px 10px;
+    font-size: 0.85rem;
+}
+
+.attendance-details-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 15px;
+    background: var(--card-bg);
+    box-shadow: var(--shadow);
+}
+
+.attendance-details-table thead {
+    background: linear-gradient(135deg, var(--pride-red) 0%, var(--pride-orange) 20%, var(--pride-yellow) 40%, var(--pride-green) 60%, var(--pride-blue) 80%, var(--pride-purple) 100%);
+    color: white;
+}
+
+.attendance-details-table th {
+    padding: 10px;
+    text-align: left;
+    font-weight: 600;
+}
+
+.attendance-details-table td {
+    padding: 8px 10px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.attendance-details-table tbody tr.present {
+    background: rgba(16, 185, 129, 0.1);
+}
+
+.attendance-details-table tbody tr.absent {
+    background: rgba(239, 68, 68, 0.1);
+}
+
+.attendance-details-table tbody tr.not-recorded {
+    background: rgba(156, 163, 175, 0.1);
+}
+
+.attendance-details-table tbody tr.non-instructional {
+    background: rgba(107, 114, 128, 0.05);
+    color: var(--secondary-color);
+    font-style: italic;
+}
+
+.attendance-details-table tbody tr:hover {
+    background: var(--bg-color);
+}

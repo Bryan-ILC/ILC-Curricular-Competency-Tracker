@@ -20,6 +20,8 @@ class CompetencyTracker {
         // Track attendance unsaved changes
         this.attendanceOriginalState = new Map(); // Map of studentId -> status for current date
         this.attendanceHasUnsavedChanges = false;
+        // Auto-sync timer
+        this.autoSyncInterval = null;
         // Google Drive API Configuration
         // Google OAuth Client ID from: https://console.cloud.google.com/apis/credentials
         this.googleClientId = '300204383142-eh36815ii1kvng5ranq7vagj78a4050d.apps.googleusercontent.com';
@@ -319,6 +321,9 @@ class CompetencyTracker {
         
         // Check if already connected on load
         this.checkGoogleDriveConnection();
+        
+        // Start automatic sync if connected
+        this.startAutoSync();
         
         // Initialize view buttons
         this.updateViewButtons('students');
@@ -3734,8 +3739,8 @@ class CompetencyTracker {
     }
 
     // Data Management
-    async exportAllData() {
-        const data = {
+    async exportAllDataForSync() {
+        return {
             students: await this.getAll('students'),
             courses: await this.getAll('courses'),
             records: await this.getAll('records'),
@@ -3747,7 +3752,10 @@ class CompetencyTracker {
             teacherTracking: await this.getAll('teacherTracking'),
             exportedAt: new Date().toISOString()
         };
+    }
 
+    async exportAllData() {
+        const data = await this.exportAllDataForSync();
         const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
         const url = window.URL.createObjectURL(blob);
         const a = document.createElement('a');
@@ -3755,6 +3763,259 @@ class CompetencyTracker {
         a.download = `competency_tracker_backup_${new Date().toISOString().split('T')[0]}.json`;
         a.click();
         window.URL.revokeObjectURL(url);
+    }
+
+    async importAllDataFromDrive(driveData) {
+        // Merge data intelligently - don't replace, merge
+        let updateCount = 0;
+        
+        // Merge students (update existing, add new)
+        if (driveData.students) {
+            const localStudents = await this.getAll('students');
+            const localStudentMap = new Map(localStudents.map(s => [s.id, s]));
+            
+            for (const driveStudent of driveData.students) {
+                const local = localStudentMap.get(driveStudent.id);
+                if (local) {
+                    // Update existing - merge properties, prefer newer data
+                    const merged = { ...local, ...driveStudent };
+                    if (driveStudent.updatedAt && (!local.updatedAt || driveStudent.updatedAt > local.updatedAt)) {
+                        await this.update('students', merged);
+                        updateCount++;
+                    }
+                } else {
+                    // New student
+                    await this.add('students', driveStudent);
+                    updateCount++;
+                }
+            }
+        }
+        
+        // Merge courses
+        if (driveData.courses) {
+            const localCourses = await this.getAll('courses');
+            const localCourseMap = new Map(localCourses.map(c => [c.id, c]));
+            
+            for (const driveCourse of driveData.courses) {
+                const local = localCourseMap.get(driveCourse.id);
+                if (local) {
+                    const merged = { ...local, ...driveCourse };
+                    if (driveCourse.updatedAt && (!local.updatedAt || driveCourse.updatedAt > local.updatedAt)) {
+                        await this.update('courses', merged);
+                        updateCount++;
+                    }
+                } else {
+                    await this.add('courses', driveCourse);
+                    updateCount++;
+                }
+            }
+        }
+        
+        // Merge records (competency records)
+        if (driveData.records) {
+            const localRecords = await this.getAll('records');
+            const localRecordMap = new Map(localRecords.map(r => [`${r.studentId}-${r.courseId}`, r]));
+            
+            for (const driveRecord of driveData.records) {
+                const key = `${driveRecord.studentId}-${driveRecord.courseId}`;
+                const local = localRecordMap.get(key);
+                if (local) {
+                    const merged = { ...local, ...driveRecord };
+                    if (driveRecord.updatedAt && (!local.updatedAt || driveRecord.updatedAt > local.updatedAt)) {
+                        await this.update('records', merged);
+                        updateCount++;
+                    }
+                } else {
+                    await this.add('records', driveRecord);
+                    updateCount++;
+                }
+            }
+        }
+        
+        // Merge stock comments
+        if (driveData.stockComments) {
+            const localComments = await this.getAll('stockComments');
+            const localCommentMap = new Map(localComments.map(c => [c.id, c]));
+            
+            for (const driveComment of driveData.stockComments) {
+                const local = localCommentMap.get(driveComment.id);
+                if (local) {
+                    const merged = { ...local, ...driveComment };
+                    if (driveComment.updatedAt && (!local.updatedAt || driveComment.updatedAt > local.updatedAt)) {
+                        await this.update('stockComments', merged);
+                        updateCount++;
+                    }
+                } else {
+                    await this.add('stockComments', driveComment);
+                    updateCount++;
+                }
+            }
+        }
+        
+        // Merge attendance
+        if (driveData.attendance) {
+            const localAttendance = await this.getAll('attendance');
+            const localAttendanceMap = new Map(localAttendance.map(a => [`${a.studentId}-${a.date}`, a]));
+            
+            for (const driveAttendance of driveData.attendance) {
+                const key = `${driveAttendance.studentId}-${driveAttendance.date}`;
+                const local = localAttendanceMap.get(key);
+                if (local) {
+                    const merged = { ...local, ...driveAttendance };
+                    if (driveAttendance.updatedAt && (!local.updatedAt || driveAttendance.updatedAt > local.updatedAt)) {
+                        await this.update('attendance', merged);
+                        updateCount++;
+                    }
+                } else {
+                    await this.add('attendance', driveAttendance);
+                    updateCount++;
+                }
+            }
+        }
+        
+        // Merge other data types
+        const otherStores = ['nonInstructionalDays', 'attendanceColorIndicators', 'attendanceNotes', 'teacherTracking'];
+        for (const storeName of otherStores) {
+            if (driveData[storeName]) {
+                const local = await this.getAll(storeName);
+                const localMap = new Map(local.map(item => [item.id || item.date || item.studentId, item]));
+                
+                for (const driveItem of driveData[storeName]) {
+                    const key = driveItem.id || driveItem.date || driveItem.studentId;
+                    const localItem = localMap.get(key);
+                    if (!localItem) {
+                        await this.add(storeName, driveItem);
+                        updateCount++;
+                    }
+                }
+            }
+        }
+        
+        return updateCount;
+    }
+
+    async importAllDataFromDrivePreferLocal(driveData) {
+        // Merge data but prefer local data when there are conflicts
+        // Only add new items from Drive, don't overwrite existing local items
+        let updateCount = 0;
+        
+        // Merge students - only add new ones, don't overwrite existing
+        if (driveData.students) {
+            const localStudents = await this.getAll('students');
+            const localStudentMap = new Map(localStudents.map(s => [s.id, s]));
+            
+            for (const driveStudent of driveData.students) {
+                const local = localStudentMap.get(driveStudent.id);
+                if (!local) {
+                    // New student from Drive - add it
+                    await this.add('students', driveStudent);
+                    updateCount++;
+                }
+                // If local exists, keep local version (don't overwrite)
+            }
+        }
+        
+        // Merge courses - only add new ones
+        if (driveData.courses) {
+            const localCourses = await this.getAll('courses');
+            const localCourseMap = new Map(localCourses.map(c => [c.id, c]));
+            
+            for (const driveCourse of driveData.courses) {
+                const local = localCourseMap.get(driveCourse.id);
+                if (!local) {
+                    await this.add('courses', driveCourse);
+                    updateCount++;
+                }
+            }
+        }
+        
+        // Merge records - add new ones, update only if Drive has newer timestamp AND local doesn't have recent changes
+        if (driveData.records) {
+            const localRecords = await this.getAll('records');
+            const localRecordMap = new Map(localRecords.map(r => [`${r.studentId}-${r.courseId}`, r]));
+            
+            for (const driveRecord of driveData.records) {
+                const key = `${driveRecord.studentId}-${driveRecord.courseId}`;
+                const local = localRecordMap.get(key);
+                if (!local) {
+                    // New record from Drive
+                    await this.add('records', driveRecord);
+                    updateCount++;
+                } else {
+                    // Both exist - only update if Drive is significantly newer (more than 1 minute)
+                    const localTime = local.updatedAt ? new Date(local.updatedAt).getTime() : 0;
+                    const driveTime = driveRecord.updatedAt ? new Date(driveRecord.updatedAt).getTime() : 0;
+                    const timeDiff = driveTime - localTime;
+                    // Only update if Drive is more than 1 minute newer (60000 ms)
+                    if (timeDiff > 60000) {
+                        const merged = { ...local, ...driveRecord };
+                        await this.update('records', merged);
+                        updateCount++;
+                    }
+                    // Otherwise keep local version
+                }
+            }
+        }
+        
+        // Merge stock comments - only add new ones
+        if (driveData.stockComments) {
+            const localComments = await this.getAll('stockComments');
+            const localCommentMap = new Map(localComments.map(c => [c.id, c]));
+            
+            for (const driveComment of driveData.stockComments) {
+                const local = localCommentMap.get(driveComment.id);
+                if (!local) {
+                    await this.add('stockComments', driveComment);
+                    updateCount++;
+                }
+            }
+        }
+        
+        // Merge attendance - add new dates, but prefer local for same date
+        if (driveData.attendance) {
+            const localAttendance = await this.getAll('attendance');
+            const localAttendanceMap = new Map(localAttendance.map(a => [`${a.studentId}-${a.date}`, a]));
+            
+            for (const driveAttendance of driveData.attendance) {
+                const key = `${driveAttendance.studentId}-${driveAttendance.date}`;
+                const local = localAttendanceMap.get(key);
+                if (!local) {
+                    // New attendance record from Drive
+                    await this.add('attendance', driveAttendance);
+                    updateCount++;
+                } else {
+                    // Both exist - only update if Drive is significantly newer
+                    const localTime = local.updatedAt ? new Date(local.updatedAt).getTime() : 0;
+                    const driveTime = driveAttendance.updatedAt ? new Date(driveAttendance.updatedAt).getTime() : 0;
+                    const timeDiff = driveTime - localTime;
+                    if (timeDiff > 60000) { // More than 1 minute newer
+                        const merged = { ...local, ...driveAttendance };
+                        await this.update('attendance', merged);
+                        updateCount++;
+                    }
+                }
+            }
+        }
+        
+        // Merge other data types - only add new items
+        const otherStores = ['nonInstructionalDays', 'attendanceColorIndicators', 'attendanceNotes', 'teacherTracking'];
+        for (const storeName of otherStores) {
+            if (driveData[storeName]) {
+                const local = await this.getAll(storeName);
+                const localMap = new Map(local.map(item => [item.id || item.date || item.studentId, item]));
+                
+                for (const driveItem of driveData[storeName]) {
+                    const key = driveItem.id || driveItem.date || driveItem.studentId;
+                    const localItem = localMap.get(key);
+                    if (!localItem) {
+                        await this.add(storeName, driveItem);
+                        updateCount++;
+                    }
+                }
+            }
+        }
+        
+        return updateCount;
     }
 
     async importData(event) {
@@ -4134,6 +4395,10 @@ class CompetencyTracker {
         
         console.log('Saved token:', savedToken ? 'Present (' + savedToken.substring(0, 20) + '...)' : 'Missing');
         console.log('Saved file ID:', savedFileId || 'Missing');
+        if (savedFileId) {
+            console.log('📁 File ID:', savedFileId);
+            console.log('🔗 Direct link to file:', `https://drive.google.com/file/d/${savedFileId}/view`);
+        }
         console.log('Saved email:', savedEmail || 'Missing');
         
         console.log('Instance token:', this.googleAccessToken ? 'Present' : 'Missing');
@@ -4374,15 +4639,24 @@ class CompetencyTracker {
                     // Find or create the sync file
                     try {
                         await this.findOrCreateDriveFile();
+                        if (this.googleDriveFileId) {
+                            console.log('Sync file ready. File ID:', this.googleDriveFileId);
+                            console.log('You can find the file in Google Drive: BC_Curriculum_All_Data.json');
+                        } else {
+                            console.warn('File ID not set after findOrCreateDriveFile');
+                        }
                     } catch (fileError) {
                         console.error('Error with Drive file:', fileError);
-                        alert('Connected to Google Drive, but there was an error creating the sync file. Please try syncing again.');
+                        alert('Connected to Google Drive, but there was an error creating the sync file.\n\nError: ' + fileError.message + '\n\nPlease try syncing again.');
                     }
                     
                     localStorage.setItem('googleDriveToken', this.googleAccessToken);
                     this.updateDriveUI(true, localStorage.getItem('googleDriveEmail'));
                     
-                    alert('Successfully connected to Google Drive!');
+                    // Start auto-sync
+                    this.startAutoSync();
+                    
+                    alert('Successfully connected to Google Drive!\n\nAuto-sync is now enabled (every 5 minutes).');
                 }
             });
 
@@ -4412,7 +4686,7 @@ class CompetencyTracker {
 
     async findOrCreateDriveFile() {
         try {
-            const fileName = 'BC_Curriculum_Enrollments.csv';
+            const fileName = 'BC_Curriculum_All_Data.json';
             
             // Search for existing file using REST API
             const searchResponse = await fetch(
@@ -4433,7 +4707,7 @@ class CompetencyTracker {
                 // Create new file using REST API
                 const fileMetadata = {
                     name: fileName,
-                    mimeType: 'text/csv'
+                    mimeType: 'application/json'
                 };
 
                 const createResponse = await fetch(
@@ -4448,9 +4722,22 @@ class CompetencyTracker {
                     }
                 );
 
+                if (!createResponse.ok) {
+                    const errorText = await createResponse.text().catch(() => '');
+                    console.error('Failed to create file:', createResponse.status, errorText);
+                    throw new Error(`Failed to create file: ${createResponse.status} ${errorText}`);
+                }
+
                 const createData = await createResponse.json();
+                if (!createData.id) {
+                    console.error('File created but no ID returned:', createData);
+                    throw new Error('File created but no ID returned from Google Drive');
+                }
+                
                 this.googleDriveFileId = createData.id;
                 localStorage.setItem('googleDriveFileId', this.googleDriveFileId);
+                console.log('File created successfully. File ID:', this.googleDriveFileId);
+                console.log('File name:', fileName);
             }
         } catch (error) {
             console.error('Error finding/creating Drive file:', error);
@@ -4458,7 +4745,7 @@ class CompetencyTracker {
         }
     }
 
-    async syncWithGoogleDrive() {
+    async syncWithGoogleDrive(isManualSync = true) {
         // Reload connection state from localStorage in case it wasn't loaded
         const savedToken = localStorage.getItem('googleDriveToken');
         const savedFileId = localStorage.getItem('googleDriveFileId');
@@ -4471,88 +4758,23 @@ class CompetencyTracker {
         }
         
         if (!this.googleAccessToken || !this.googleDriveFileId) {
-            alert('Please connect to Google Drive first.\n\nClick "Connect to Google Drive" to establish a connection.');
+            if (isManualSync) {
+                alert('Please connect to Google Drive first.\n\nClick "Connect to Google Drive" to establish a connection.');
+            }
             return;
         }
 
         const syncBtn = document.getElementById('sync-drive-btn');
-        if (syncBtn) {
+        if (syncBtn && isManualSync) {
             syncBtn.disabled = true;
             syncBtn.textContent = 'Syncing...';
         }
 
         try {
-            // First, download current file from Drive to see if there are updates
-            const downloadResponse = await fetch(
-                `https://www.googleapis.com/drive/v3/files/${this.googleDriveFileId}?alt=media`,
-                {
-                    headers: {
-                        'Authorization': `Bearer ${this.googleAccessToken}`
-                    }
-                }
-            );
-
-            // Check response status and handle errors
-            if (downloadResponse.status === 401) {
-                // Token expired, need to reconnect
-                const errorData = await downloadResponse.text().catch(() => '');
-                console.error('Token expired. Response:', errorData);
-                alert('Your Google Drive connection has expired. Please reconnect by clicking "Connect to Google Drive".');
-                this.googleAccessToken = null;
-                this.googleDriveFileId = null;
-                localStorage.removeItem('googleDriveToken');
-                localStorage.removeItem('googleDriveFileId');
-                this.updateDriveUI(false);
-                return;
-            }
-            
-            if (downloadResponse.status === 403) {
-                // Permission denied
-                const errorData = await downloadResponse.text().catch(() => '');
-                console.error('Permission denied. Response:', errorData);
-                throw new Error('Permission denied (403). You may not have access to this file. Check Google Drive sharing settings.');
-            }
-            
-            if (downloadResponse.status === 404) {
-                // File not found
-                console.log('File not found, attempting to create it...');
-                await this.findOrCreateDriveFile();
-                if (!this.googleDriveFileId) {
-                    throw new Error('Could not create or find the sync file in Google Drive. Please check your permissions.');
-                }
-                // Retry download after creating file
-                const retryResponse = await fetch(
-                    `https://www.googleapis.com/drive/v3/files/${this.googleDriveFileId}?alt=media`,
-                    {
-                        headers: {
-                            'Authorization': `Bearer ${this.googleAccessToken}`
-                        }
-                    }
-                );
-                if (!retryResponse.ok && retryResponse.status !== 404) {
-                    throw new Error(`Failed to access file: ${retryResponse.status} ${retryResponse.statusText}`);
-                }
-            }
-
-            let importedCount = 0;
-            if (downloadResponse.ok) {
-                const driveContent = await downloadResponse.text();
-                
-                // If file has content, import it first (merge with local data)
-                if (driveContent.trim().length > 0) {
-                    importedCount = await this.importEnrollmentsFromText(driveContent);
-                }
-            } else if (downloadResponse.status === 404) {
-                // File not found - this should have been handled above, but just in case
-                console.log('File still not found after retry');
-            } else if (!downloadResponse.ok) {
-                const errorText = await downloadResponse.text().catch(() => '');
-                console.error('Download error:', downloadResponse.status, errorText);
-                throw new Error(`Failed to download from Google Drive: ${downloadResponse.status} ${downloadResponse.statusText}`);
-            }
-
-            // Then upload current local data to Drive
-            const csvContent = await this.generateEnrollmentsCSV();
+            // FIRST: Upload current local data to Drive (save local changes)
+            // This ensures your local changes are saved before merging
+            const allData = await this.exportAllDataForSync();
+            const jsonContent = JSON.stringify(allData, null, 2);
             
             // Use simple upload for small files
             const uploadResponse = await fetch(
@@ -4561,9 +4783,9 @@ class CompetencyTracker {
                     method: 'PATCH',
                     headers: {
                         'Authorization': `Bearer ${this.googleAccessToken}`,
-                        'Content-Type': 'text/csv'
+                        'Content-Type': 'application/json'
                     },
-                    body: csvContent
+                    body: jsonContent
                 }
             );
 
@@ -4593,19 +4815,69 @@ class CompetencyTracker {
                 throw new Error(`Failed to upload to Google Drive: ${uploadResponse.status} ${uploadResponse.statusText}. ${errorText.substring(0, 200)}`);
             }
 
+            console.log('✅ Local data uploaded to Google Drive successfully');
+
+            // THEN: Download from Drive to get team updates (but don't overwrite local changes)
+            const downloadResponse = await fetch(
+                `https://www.googleapis.com/drive/v3/files/${this.googleDriveFileId}?alt=media`,
+                {
+                    headers: {
+                        'Authorization': `Bearer ${this.googleAccessToken}`
+                    }
+                }
+            );
+
+            // Check response status and handle errors
+            if (downloadResponse.status === 401) {
+                // Token expired, but upload already succeeded, so just warn
+                console.warn('Token expired after upload. Upload was successful.');
+                // Don't return, continue with UI update
+            } else if (downloadResponse.status === 403) {
+                // Permission denied - but upload worked, so continue
+                console.warn('Permission denied for download, but upload succeeded.');
+            } else if (downloadResponse.status === 404) {
+                // File not found - shouldn't happen after upload, but handle gracefully
+                console.warn('File not found after upload - this is unexpected.');
+            } else if (downloadResponse.ok) {
+                // Download successful - merge team updates (but preserve local changes)
+                const driveContent = await downloadResponse.text();
+                
+                if (driveContent.trim().length > 0) {
+                    try {
+                        const driveData = JSON.parse(driveContent);
+                        // Merge but prefer local data when there are conflicts
+                        const importedCount = await this.importAllDataFromDrivePreferLocal(driveData);
+                        if (importedCount > 0 && isManualSync) {
+                            console.log(`Merged ${importedCount} new/updated items from team`);
+                        }
+                    } catch (parseError) {
+                        console.error('Error parsing Drive data:', parseError);
+                        // Try legacy CSV import for backward compatibility
+                        await this.importEnrollmentsFromText(driveContent);
+                    }
+                }
+            }
+
             // Update last sync time
             const now = new Date().toISOString();
             localStorage.setItem('googleDriveLastSync', now);
             this.updateDriveUI(true, localStorage.getItem('googleDriveEmail'), now);
 
-            let message = 'Successfully synced with Google Drive!';
-            if (importedCount > 0) {
-                message += `\n\nImported ${importedCount} enrollment update(s) from team.`;
-            }
-            alert(message);
+            // Reload all data to reflect changes
+            await this.loadStudents();
+            await this.loadCourses();
             
-            this.loadStudents();
-            this.loadCourses();
+            // Show notification (silent for auto-sync, alert for manual sync)
+            if (isManualSync) {
+                let message = 'Successfully synced with Google Drive!';
+                if (importedCount > 0) {
+                    message += `\n\nImported ${importedCount} update(s) from team.`;
+                }
+                alert(message);
+            } else {
+                // Silent sync - just update UI
+                console.log('Auto-sync completed', importedCount > 0 ? `(${importedCount} updates imported)` : '');
+            }
 
         } catch (error) {
             console.error('Error syncing with Google Drive:', error);
@@ -4774,6 +5046,7 @@ class CompetencyTracker {
 
     disconnectGoogleDrive() {
         if (confirm('Disconnect from Google Drive? You can reconnect anytime.')) {
+            this.stopAutoSync();
             this.googleAccessToken = null;
             this.googleDriveFileId = null;
             localStorage.removeItem('googleDriveToken');
@@ -4782,6 +5055,41 @@ class CompetencyTracker {
             localStorage.removeItem('googleDriveLastSync');
             this.updateDriveUI(false);
             alert('Disconnected from Google Drive.');
+        }
+    }
+
+    startAutoSync() {
+        // Stop any existing auto-sync
+        this.stopAutoSync();
+        
+        // Check if connected
+        const savedToken = localStorage.getItem('googleDriveToken');
+        const savedFileId = localStorage.getItem('googleDriveFileId');
+        
+        if (savedToken && savedFileId) {
+            this.googleAccessToken = savedToken;
+            this.googleDriveFileId = savedFileId;
+            
+            // Sync every 5 minutes (300,000 milliseconds)
+            this.autoSyncInterval = setInterval(async () => {
+                try {
+                    console.log('Auto-syncing with Google Drive...');
+                    await this.syncWithGoogleDrive(false); // false = auto-sync, no alerts
+                } catch (error) {
+                    console.error('Auto-sync error:', error);
+                    // Don't alert on auto-sync errors, just log them
+                }
+            }, 5 * 60 * 1000); // 5 minutes
+            
+            console.log('Auto-sync started (every 5 minutes)');
+        }
+    }
+
+    stopAutoSync() {
+        if (this.autoSyncInterval) {
+            clearInterval(this.autoSyncInterval);
+            this.autoSyncInterval = null;
+            console.log('Auto-sync stopped');
         }
     }
 

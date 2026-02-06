@@ -4746,6 +4746,9 @@ class CompetencyTracker {
     }
 
     async syncWithGoogleDrive(isManualSync = true) {
+        // Initialize importedCount at the start of the function to ensure it's always defined
+        let importedCount = 0;
+        
         // Reload connection state from localStorage in case it wasn't loaded
         const savedToken = localStorage.getItem('googleDriveToken');
         const savedFileId = localStorage.getItem('googleDriveFileId');
@@ -4846,7 +4849,7 @@ class CompetencyTracker {
                     try {
                         const driveData = JSON.parse(driveContent);
                         // Merge but prefer local data when there are conflicts
-                        const importedCount = await this.importAllDataFromDrivePreferLocal(driveData);
+                        importedCount = await this.importAllDataFromDrivePreferLocal(driveData);
                         if (importedCount > 0 && isManualSync) {
                             console.log(`Merged ${importedCount} new/updated items from team`);
                         }
